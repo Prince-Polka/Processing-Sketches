@@ -20,6 +20,7 @@ boolean judge(int d,int midx,int midy) {
     for (int i=0; i<9; i++){
       state+= codeArray[i]?(int(pow(2,i))):0;
     }
-    store = color(255-state/2);
+    //store = color(255-state/2);
+    store = rule.testBit(state)?#000000:#ffffff;
     return rule.testBit(state);
 }

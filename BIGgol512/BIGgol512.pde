@@ -2,7 +2,8 @@ import java.math.*;
 BigInteger rule; 
 golbutton[] button = new golbutton[512];
 PImage viewport;
- 
+int array[] = { 2, 5, -2, 6, -3, 8, 0, -7, -9, 4 };
+int[]sortedrules = new int[512];
 boolean codeArray[] = new boolean[9];
 int box=10;
 int swap;
@@ -22,25 +23,23 @@ boolean closerThan(int len, int x0, int y0, int x1, int y1){
   len*=len;
   return delx+dely < len;
 }
- 
 color fillcolor;
-
- 
 void setup(){
-  size(1790,650);
+  size(1150,650);
   noStroke();
   noSmooth();
   viewport = createImage(xyz,xyz,ARGB);
   viewport.loadPixels();
   loadPixels();
+  sortrules();
   setgol(stay,born);
-  for (int i=0; i<512; i++){ 
+  for (int i=0; i<256; i++){ 
     button[i] = new golbutton(i);
   }
 }
 void draw(){
  click=(!mpa && mousePressed);
-  for (int i=0; i<512; i++){
+  for (int i=0; i<256; i++){
     button[i].show();
  }
  for (int y=0;y<xyz;y++){
