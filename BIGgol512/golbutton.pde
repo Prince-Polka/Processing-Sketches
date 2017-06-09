@@ -18,7 +18,6 @@ class golbutton{
     if(a==2){a++;}
     else if(a==3){a--;}
     state = a;
-    println(state);
   }
   golbutton(int I){
     i=I;
