@@ -27,15 +27,5 @@ void sortrules(){
   for (int i=0; i<512; i++){
     sortedrules[i]=sortedrules[i]&511;
   }
-  println(sortedrules);
-}
-void sortrules2(){
-  for (int i=0; i<512; i++){
-    sortedrules[i]=ones(i)<<9|i;
-  }
-  sortedrules=sort(sortedrules);
-  for (int i=0; i<512; i++){
-    sortedrules[i]=sortedrules[i]&511;
-  }
-  println(sortedrules);
+  //println(sortedrules);
 }

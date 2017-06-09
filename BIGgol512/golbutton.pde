@@ -13,18 +13,19 @@ class golbutton{
   boolean borner;
   color statecolor[] = {#ff0000,#ffff00,#00ff00,#0000ff};
   
-  int stateFromRule(){
+  void stateFromRule(){
     int a = (rule.testBit(keepbit)?1:0) + (rule.testBit(bornbit)?2:0);
     if(a==2){a++;}
     else if(a==3){a--;}
-    return a;
+    state = a;
+    println(state);
   }
   golbutton(int I){
     i=I;
     bornbit=sortedrules[I];
     keepbit=sortedrules[I+256];
     setbits=ones(keepbit);
-    state = stateFromRule();
+    stateFromRule();
     alive=rule.testBit(keepbit);
     posx=500+box/2+(i%16)*size;
     posy=box/2+(i/16)*size;
@@ -51,7 +52,8 @@ void toggle(){
 }
   void show(){
     mob = (mouseX>posx && mouseX<posx+size && mouseY>posy && mouseY<posy+size);
-    if(mob && click){toggle();}
+    if(mob && leftclick){toggle();}
+    if(mob && rightclick){setrow(setbits,(state+1)%4);}
     fillcolor=statecolor[state];
     //if(mob){fillcolor=#ffff00;}
     if(setbits%2==0 && state==0){fillcolor=#ffaaaa;}

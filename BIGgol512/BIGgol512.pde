@@ -1,6 +1,8 @@
 import java.math.*;
-BigInteger rule; 
+BigInteger rule = new BigInteger("0"); 
 golbutton[] button = new golbutton[512];
+int numof[] = {1, 8, 28, 56, 70, 56, 28, 8, 1};
+int indexes[] = {0, 1, 9, 37, 93, 163, 219, 247, 255, 256};
 PImage viewport;
 int array[] = { 2, 5, -2, 6, -3, 8, 0, -7, -9, 4 };
 int[]sortedrules = new int[512];
@@ -12,9 +14,17 @@ boolean[][][] fields = new boolean[2][xyz][xyz];
 int cellsize=5;
 color store;
  
-boolean mpa,click; //mouse variable
-int[] stay ={2};
-int[] born = {3};
+boolean mpa,leftclick,rightclick; //mouse variables
+void checkmouse(){
+  if(!mpa && mousePressed){
+   leftclick=mouseButton==LEFT;
+   rightclick=mouseButton==RIGHT;
+ }
+ else { leftclick=rightclick=false; } 
+}
+//int[] stay ={2};
+//int[] born = {3};
+//int[] born = {3};
 boolean closerThan(int len, int x0, int y0, int x1, int y1){
   float delx = x0-x1;
   float dely = y0-y1;
@@ -32,13 +42,16 @@ void setup(){
   viewport.loadPixels();
   loadPixels();
   sortrules();
-  setgol(stay,born);
   for (int i=0; i<256; i++){ 
     button[i] = new golbutton(i);
   }
+  conway();
+  //setrow(2,2);
+  //setrow(3,3);
+  
 }
 void draw(){
- click=(!mpa && mousePressed);
+ checkmouse();
   for (int i=0; i<256; i++){
     button[i].show();
  }

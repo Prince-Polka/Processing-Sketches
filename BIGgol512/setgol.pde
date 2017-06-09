@@ -1,4 +1,9 @@
-void setgol(int[]stay,int[]born){
+void conway(){
+setrow(2,1);
+setrow(3,2);
+}
+
+void setgolold(int[]stay,int[]born){
   boolean alive;
   int n;
   rule= new BigInteger("0");
@@ -23,4 +28,6 @@ void setgol(int[]stay,int[]born){
     }
     }
   }
+  
+  
   }
