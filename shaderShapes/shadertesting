@@ -1,4 +1,4 @@
-http://thebookofshaders.com/edit.php?log=170610223326
+http://thebookofshaders.com/edit.php?log=170610233651
 
 #ifdef GL_ES
 precision mediump float;
@@ -7,6 +7,10 @@ vec4 u_colors[2];
 int u_num;
 uniform vec2 u_mouse;
 
+// this array shall contain all shape verts
+vec2 verts [4];
+
+// distance things
 float distroot(in vec2 A, in vec2 B) {
     A=abs(A-B);
     A*=A;
@@ -23,20 +27,6 @@ s=r/(4.0+r);
 p+=2.0*s*p;
 return p;
 }
-vec2 bezierPoint(vec4 X,vec4 Y, float T) { 
-    float tempx =mix( mix( mix(X.x,X.y,T),mix(X.y,X.z,T), T), 
-                  mix( mix(X.y,X.z,T),mix(X.z,X.w,T), T), T);
-    float tempy =mix( mix( mix(Y.x,Y.y,T),mix(Y.y,Y.z,T), T), 
-                  mix( mix(Y.y,Y.z,T),mix(Y.z,Y.w,T), T), T);
-    return vec2(tempx,tempy);
-}
-
-bool ellipse(vec2 pos, vec2 size) {
-    vec2 e = ( gl_FragCoord.xy - pos) / size;
-    e*=e;
-    if( e.x+e.y < 1. ) { return true; }
-    return false;
-}
 bool closerThan(float len, vec2 A, vec2 B){
   vec2 del = A-B;
   del*=del;
@@ -44,21 +34,16 @@ bool closerThan(float len, vec2 A, vec2 B){
   return del.x+del.y < len;
 }
 
-float sign (vec2 p1, vec2 p2, vec2 p3)
-{
-    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+// shapes
+
+bool ellipse(vec2 pos, vec2 size) {
+    vec2 e = ( gl_FragCoord.xy - pos) / size;
+    e*=e;
+    if( e.x+e.y < 1. ) { return true; }
+    return false;
 }
 
-vec2 project(vec2 A, vec2 B, vec2 C){
-    vec2 L = B-A;
-    float K = dot(C-A,L);
-    K/= dot(L,L);
-    return A+L*K;
-}
-vec2 constrain (vec2 amt, vec2 low, vec2 high){
-    return clamp(amt,low,high);
-    return min(max(amt,min(low,high)),max(low,high));
-}
+// quad uses triangle which uses side
 
 bool side( vec2 A, vec2 B) {
     return dot(vec2(B.y-A.y,A.x-B.x),gl_FragCoord.xy-A)>=0.;
@@ -72,35 +57,64 @@ bool triangle(vec2 A, vec2 B, vec2 C) {
 }
 
 bool quad(vec2 A, vec2 B, vec2 C, vec2 D){
-   return false;
-  
+   return triangle(A,B,C) || triangle(C,D,A);
 }
 
-bool line (vec4 lin, float thickness){
-    vec2 start = vec2(lin.xy);
-    vec2 end = vec2(lin.zw);
-    vec2 D = constrain(project(start,end,gl_FragCoord.xy),start,end);
-    if ( closerThan ( thickness,gl_FragCoord.xy,D) ) { 
+
+
+//line uses project and constrain
+vec2 project(vec2 A, vec2 B, vec2 C){
+    vec2 L = B-A;
+    float K = dot(C-A,L);
+    K/= dot(L,L);
+    return A+L*K;
+}
+// like clamp() but better
+vec2 constrain (vec2 amt, vec2 low, vec2 high){
+    return min(max(amt,min(low,high)),max(low,high));
+}
+
+bool line (vec2 A, vec2 B, float thickness){
+    vec2 C = gl_FragCoord.xy;
+    vec2 D = constrain(project(A,B,C),A,B);
+    if ( closerThan ( thickness,C,D) ) { 
         return true; 
     }
+    //return false;
+}
+
+// bezier uses bezierpoint and line
+
+vec2 bezierPoint(vec2 A, vec2 B, vec2 C, vec2 D, float T) { 
+    vec2 AB = mix(A,B,T);
+    vec2 BC = mix(B,C,T);
+    vec2 CD = mix(C,D,T);
+    return mix( mix(AB,BC,T) , mix(BC,CD,T) , T );
+}
+
+bool bezier(vec2 A, vec2 B, vec2 C, vec2 D){
+    float I=0.0;
+    vec2 prev=bezierPoint(A,B,C,D,0.);
+    vec2 cur;
+for (int i=0; i<10; i++){
+    I+=0.1;
+    cur = bezierPoint(A,B,C,D,I);
+    if( line(prev,cur,10.) ){
+        return true;
+    }
+    prev =cur;
+}
     return false;
 }
 
 void main() {
     float d=0.;
-    vec4 curvex = vec4(27.358,95.223,240.343,320.400);
-    vec4 curvey = vec4(225.532,208.645,300.970,100.100);
-    float I=0.0;
-    vec2 prev=bezierPoint(curvex,curvey,0.);
-    vec2 cur;
-for (int i=0; i<100; i++){
-    I+=0.01;
-    cur = bezierPoint(curvex,curvey,I);
-    if( line(vec4(prev,cur),10.) ){
-        d=1.0; break;
-    }
-    prev =cur;
-}
+    verts[0] = vec2(27.,225.);
+    verts[1] = vec2(95.,208.);
+    verts[2] = vec2(240.,300.);
+    verts[3] = vec2(320.,100.);
+    if ( line( vec2(40.,380.) , vec2(200.,340.) , 10. ) ){d=1.;}
+    if ( bezier(vec2(27.,225.),vec2(95.,208.),vec2(240.,300.),vec2(320.,100.))  ) {d=1.0;}
     if(ellipse(vec2(400.,300.),vec2(100.,200))){d=1.0;}
     if( triangle( vec2(200.100) , vec2(10.100) , vec2(350.,100.) ) ){d=1.0;}
 gl_FragColor = vec4(d,0.,0.,1.0);
