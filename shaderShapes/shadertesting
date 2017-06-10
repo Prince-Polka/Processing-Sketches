@@ -29,17 +29,6 @@ void drawshapes(){
 
 uniform vec2 u_mouse;
 
-vec2 project(vec2 A, vec2 B, vec2 C){
-    vec2 L = B-A;
-    float K = dot(C-A,L);
-    K/= dot(L,L);
-    return A+L*K;
-}
-
-vec2 constrain (vec2 amt, vec2 low, vec2 high){
-    return min(max(amt,min(low,high)),max(low,high));
-}
-
 float distroot(in vec2 A, in vec2 B) {
     A=abs(A-B);
     A*=A;
@@ -65,7 +54,6 @@ vec2 bezierPoint(vec4 X,vec4 Y, float T) {
     return vec2(tempx,tempy);
 }
 
-
 bool ellipse(vec2 pos, vec2 size) {
     vec2 e = ( gl_FragCoord.xy - pos) / size;
     e*=e;
@@ -74,19 +62,101 @@ bool ellipse(vec2 pos, vec2 size) {
 }
 
 
-bool ellipser(){
-    if(dist(gl_FragCoord.xy,vec2(100.,100.))<100.){
-        return true;
-    } else{ return false;}
-    
-    
-}
-
 bool closerThan(float len, vec2 A, vec2 B){
   vec2 del = A-B;
   del*=del;
   len*=len;
   return del.x+del.y < len;
+}
+
+float sign (vec2 p1, vec2 p2, vec2 p3)
+{
+    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
+
+float area(vec2 p0, vec2 p1, vec2 p2){
+    return  0.5 *(-p1.y*p2.x + p0.y*(-p1.x + p2.x) + p0.x*(p1.y - p2.y) + p1.x*p2.y);
+}
+bool triangle2 (vec2 p0,vec2 p1, vec2 p2)
+{
+    vec2 p = gl_FragCoord.xy;
+    float Area = area(p0,p1,p2);
+    float s = 1./(2.*Area)*(p0.y*p2.x - p0.x*p2.y + (p2.y - p0.y)*p.x + (p0.x - p2.x)*p.y);
+    float t = 1./(2.*Area)*(p0.x*p1.y - p0.y*p1.x + (p0.y - p1.y)*p.x + (p1.x - p0.x)*p.y);
+    
+    return s>0. && t>0. && 1.-s-t>0.;
+    
+}
+vec2 project(vec2 A, vec2 B, vec2 C){
+    vec2 L = B-A;
+    float K = dot(C-A,L);
+    K/= dot(L,L);
+    return A+L*K;
+}
+vec2 constrain (vec2 amt, vec2 low, vec2 high){
+    return clamp(amt,low,high);
+    return min(max(amt,min(low,high)),max(low,high));
+}
+
+
+bool triangl(vec2 p0,vec2 p1, vec2 p2){
+    vec2 p = gl_FragCoord.xy;
+    vec2 A = constrain(project(p0,p1,p),p0,p1);
+    if ( A==p0 || A==p1 ) { return false; }
+    vec2 B = constrain(project(p1,p2,p),p1,p2);
+    if ( B==p1 || B==p2 ) { return false; }
+    vec2 C = constrain(project(p2,p0,p),p2,p0);
+    if ( C==p0 || C==p2 ) { return false; }
+    return true;
+}
+
+bool tri(vec2 A, vec2 B, vec2 C){
+    vec2 P = gl_FragCoord.xy;
+    vec2 PA = A-P;
+    vec2 BC = C-B;
+    float PABC = (A.x - P.x) * (C.y - B.y) - (C.x-B.x) * (A.y - P.y);
+    return false;
+}
+
+float side( vec2 A, vec2 B)
+{
+    return dot(vec2(B.y-A.y,A.x-B.x),gl_FragCoord.xy-A);
+}
+
+bool triangle(vec2 A, vec2 B, vec2 C)
+{
+    
+ bool a = side(A,B) >= 0.;
+ bool b = side(B,C) >= 0.;
+ if(a!=b){return false;}
+ bool c = side(C,A) >= 0.;
+ return b==c;
+}
+
+bool trianglea(vec2 A,vec2 B, vec2 C) 
+{
+    vec2 p = gl_FragCoord.xy;
+    float s = A.y * C.x - A.x * C.y + (C.y - A.y) * p.x + (A.x - C.x) * p.y;
+    float t = A.y * B.y - A.y * B.x + (A.y - B.y) * p.x + (B.x - A.x) * p.y;
+    
+    if ((s < 0.) != (t < 0.)) { return false; }
+
+    float Ar = -B.y * C.x + A.y * (C.x - B.y) + A.x * (B.y - C.y) + B.x * C.y;
+    if (Ar < 0.0)
+    {
+        s = -s;
+        t = -t;
+        Ar = -Ar;
+    }
+    return s > 0. && t > 0. && (s + t) <= Ar;
+}
+
+
+
+
+bool quad(vec2 A, vec2 B, vec2 C, vec2 D){
+   return false;
+  
 }
 
 bool line (vec4 lin, float thickness){
@@ -116,5 +186,7 @@ for (int i=0; i<100; i++){
     prev =cur;
 }
     if(ellipse(vec2(400.,300.),vec2(100.,200))){d=1.0;}
+    if( triangle( vec2(200.100) , vec2(10.100) , vec2(350.,100.) ) ){d=1.0;}
 gl_FragColor = vec4(d,0.,0.,1.0);
 }
+
