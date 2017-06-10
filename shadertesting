@@ -1,0 +1,77 @@
+http://thebookofshaders.com/edit.php?log=170610011912   
+
+#ifdef GL_ES
+precision mediump float;
+#endif
+//uniform sampler2D u_texture;
+//uniform vec2 u_resolution;
+vec4 u_colors[2];
+int u_num;
+uniform vec2 u_mouse;
+//uniform int sprite;
+//vec4 c1, c2;
+//float mix;
+
+
+vec2 spritepos;
+float distroot(in vec2 A, in vec2 B) {
+    A=abs(A-B);
+    A*=A;
+return sqrt(A.x+A.y);
+}
+float dist(in vec2 A, in vec2 B) {
+float p,q,r,s;
+A=abs(A-B);
+p = max(A.x,A.y);
+q = min(A.x,A.y);
+r=q/p;
+r*=r;
+s=r/(4.0+r);
+p+=2.0*s*p;
+return p;
+}
+float lerp(float  A, float B, float C) { return A*(1.-C)+B*C; }
+
+float bez(float A, float B, float C, float D, float T) { 
+  return lerp( lerp( lerp(A,B,T),lerp(B,C,T), T), 
+               lerp( lerp(B,C,T),lerp(C,D,T), T), T);
+}
+
+vec2 bezierPoint(vec4 X,vec4 Y, float T) { 
+    float tempx =lerp( lerp( lerp(X.x,X.y,T),lerp(X.y,X.z,T), T), 
+                  lerp( lerp(X.y,X.z,T),lerp(X.z,X.w,T), T), T);
+    float tempy =lerp( lerp( lerp(Y.x,Y.y,T),lerp(Y.y,Y.z,T), T), 
+                  lerp( lerp(Y.y,Y.z,T),lerp(Y.z,Y.w,T), T), T);
+    return vec2(tempx,tempy);
+}
+
+bool closerThan(float len, vec2 A, vec2 B){
+  vec2 del = A-B;
+  del*=del;
+  len*=len;
+  return del.x+del.y < len;
+}
+
+void main() {
+    float d=0.;
+    vec4 curvex = vec4(166.090,240.343,152.857,20.400);
+    vec4 curvey = vec4(125.034,258.052,260.540,30.100);
+    vec2 tempo=vec2(0.,0.);
+    float aa=0.;
+    float bb=0.;
+    float flo=0.0;
+for (int i=0; i<10; i++){
+    flo+=0.1;
+    aa = bez(curvex.x,curvex.y,curvex.z,curvex.w,flo);
+    bb = bez(curvey.x,curvey.y,curvey.z,curvey.w,flo);
+    if( closerThan (10.0,gl_FragCoord.xy,vec2(aa,bb) )){
+        d=1.0; break;
+    }
+    
+}
+    //tempo = bezierPoint(curvex,curvey,flo);
+    //d+= distroot(gl_FragCoord.xy,vec2(aa,bb));
+
+gl_FragColor = vec4(vec3(d/1.0),1.0);
+    //vec4(c1 * mix + (c2 * abs( 1. - mix ) ) );
+}
