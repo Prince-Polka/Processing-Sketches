@@ -1,4 +1,4 @@
-http://thebookofshaders.com/edit.php?log=170611102132
+http://thebookofshaders.com/edit.php?log=170611124835
 
 #ifdef GL_ES
 precision mediump float;
@@ -8,12 +8,30 @@ vec4 background = vec4(0.268,0.286,0.370,1.000);
 int u_num;
 uniform vec2 u_mouse;
 
-// this array shall contain all shape data neeeded to render, and supplied from processing
-vec2 verts [4];
-vec4 fills [4];
-vec4 strokes [4];
-int shape[5];
+/*
+This shader under construction will render shapes sent from processing
+a class in processing, ( not yet implemented ) will handle the communication seamlessly
+syntax shall similar to to PGraphics, but only include simple shapes like line() , not text() 
+example
+void draw(){
+.beginDraw();
+.background();
+.fill();
+.stroke();
+.line();
+.ellipse();
+.quad();
+.endDraw();
+}
+*/
 
+// this array shall contain all shape data neeeded to render, and supplied from processing
+
+int type[6];
+/* shapes will be stored in arrays, will contain some superfluous data as glsl is not good with lookup
+   textures COULD be more efficent but not surely, so ill go with arrays */
+mat4 shape[5]; // first rows [0] and [1] is vec2 verts A B C D ,  row [2] fill, row [3] stroke 
+float strokeWeight[5]; // 
 
 // distance things
 float distroot(in vec2 A, in vec2 B) {
@@ -64,8 +82,6 @@ bool triangle(vec2 A, vec2 B, vec2 C) {
 bool quad(vec2 A, vec2 B, vec2 C, vec2 D){
    return triangle(A,B,C) || triangle(C,D,A);
 }
-
-
 
 //line uses project and constrain
 vec2 project(vec2 A, vec2 B, vec2 C){
@@ -169,57 +185,86 @@ vec4 blend(vec4 background , vec4 foreground, int mode){
 
 void main() {
     vec4 frag=background;
-    int i=0;
-    int vertindex=0;
-    // these arrays shall be set by processing but setting manually while coding
+ 
+    // the arrays shall be set by processing but setting manually while coding
     
+    type[0] = 1; //line
+    type[1] = 2; //bezier
+    type[2] = 3; //ellipse
+    type[3] = 4; //triangle
+    type[4] = 5; //quad
+    type[5] = 0; // no shape stop loop
+    
+    //line
+    shape[0][0] = vec4(40.,380.,200.,340.); // A B verts
+    shape[0][1]=vec4(0.); // C D verts
+    shape[0][2]=vec4(0.); // fill
+    shape[0][3]=vec4(0.805,0.703,0.332,1.000); //stroke
+    
+    //bezier 
+    shape[1][0]=vec4(27.,225.,95.,208.);
+    shape[1][1]=vec4(240.,300.,320.,100.);
+    shape[1][2]=vec4(0.269,0.625,0.273,1.000);
+    shape[1][3]=vec4(0.785,0.373,0.335,1.000);
+    
+    //ellipse
+    shape[2][0] = vec4(400.,300.,100.,200);
+    shape[2][1] = vec4(0.);
+    shape[2][2] = vec4(0.264,0.625,0.307,1.000);
+    shape[2][3] = vec4(0.);
+    
+    //triangle
+    shape[3][0] = vec4(200.,200.,10.,10.); 
+    shape[3][1] = vec4(350.,100.,0.,0.);
+    shape[3][2] = vec4(0.194,0.165,0.730,1.000);
+    shape[3][3] = vec4(0.);
+    
+    //quad
+    shape[4][0] = vec4(30.,490.,310.,480.); 
+    shape[4][1] = vec4(450.,300.,150.,390.);
+    shape[4][2] = vec4(0.730,0.623,0.544,1.000);
+    shape[4][3] = vec4(0.);
 
-    // consolidating all verts into one array might not work because of array lookup having to be constant
-    
-    verts[0] = vec2(27.,225.);
-    verts[1] = vec2(95.,208.);
-    verts[2] = vec2(240.,300.);
-    verts[3] = vec2(320.,100.);
-    
-    fills[0] = vec4(0.420,0.184,0.261,1.000);
-    fills[1] = vec4(0.269,0.625,0.273,1.000);
-    fills[2] = vec4(0.264,0.625,0.307,1.000);
-    fills[3] = vec4(0.194,0.165,0.730,1.000);
-    strokes[0] = vec4(0.805,0.703,0.332,1.000);
-    strokes[1] = vec4(0.785,0.373,0.335,1.000);
-    strokes[2] = vec4(0.520,0.397,0.795,1.000);
-    strokes[3] = vec4(0.380,0.695,0.253,1.000);
-    
-    // array containing what type of shape each shape is , 0 = no shape to break loop , 1= line etc
-    
-    shape[0] = 1;
-    shape[1] = 2;
-    shape[2] = 3;
-    shape[3] = 4;
-    shape[4] = 0;
-    
     // main function shall loop through arrays to render fragments from array data, from background to forefront
-    //if(shape[i]==1){
-        //if (line(verts[vertindex],verts[vertindex+1],10.)){
-            
-        //}
-        //vertindex+=2;
-    //}
-    if ( line( vec2(40.,380.) , vec2(200.,340.) , 10. ) ){
-       frag = blend (frag,strokes[0],0);
-    }
-    i++;
-    if ( bezier(vec2(27.,225.),vec2(95.,208.),vec2(240.,300.),vec2(320.,100.))  ) {
-        frag = blend (frag,strokes[1],0);
-    }
-    i++;
-    if(ellipse(vec2(400.,300.),vec2(100.,200))){
-        frag = blend (frag,fills[2],0);
-    }
-    i++;
-    if( triangle( vec2(200.100) , vec2(10.100) , vec2(350.,100.) ) ){
-        frag = blend (frag,fills[3],0);
-    }
     
+    // ABCD shorthand for 4 first verts from mat4 , fill 3rd row, stroke 4th row
+    vec2 A,B,C,D;
+    vec4 fill,stroke;
+    for (int i=0; i<5; i++){
+        if(type[i]==0){ break; } // stops loop when no more shapes in array
+    A=vec2 ( shape[i][0][0] , shape[i][0][1]);
+    B=vec2 ( shape[i][0][2] , shape[i][0][3]);
+    C=vec2 ( shape[i][1][0] , shape[i][1][1]);
+    D=vec2 ( shape[i][1][2] , shape[i][1][3]);
+    fill   = shape[i][2];
+    stroke = shape[i][3];
+        if(type[i]==1){
+            if ( line(A,B,10.) ){
+                frag = blend (frag, stroke, 0);
+            }
+        }
+        if(type[i]==2){
+            if ( bezier(A,B,C,D) ){
+                frag = blend (frag, stroke, 0);
+            }
+        }
+        if(type[i]==3){
+            if ( ellipse(A,B) ){
+                frag = blend (frag, fill, 0);
+            }
+        }
+        if(type[i]==4){
+            if ( triangle(A,B,C) ){
+                frag = blend (frag, fill, 0);
+            }
+        }
+        if(type[i]==5){
+            if ( quad(A,B,C,D) ){
+                frag = blend (frag, fill, 0);
+            }
+        }
+        
+    }
+
 gl_FragColor = frag;
 }
