@@ -2,7 +2,7 @@
 precision mediump float;
 #endif
 vec4 u_colors[2];
-vec4 background = vec4(0.268,0.286,0.370,1.000);
+
 int u_num;
 uniform vec2 u_mouse;
 
@@ -25,15 +25,15 @@ void draw(){
 
 // this array shall contain all shape data neeeded to render, and supplied from processing
 
-int command[13]; // to be renamed command, will include fill() etc not just shapes
+
 /*
 will not use mat4 shape[], instead twp vec4's , fill and stroke will have their own command/command in the loop
 /* shapes will be stored in arrays, will contain some superfluous data as glsl is not good with lookup
    textures COULD be more efficent but not surely, so ill go with arrays */
 mat4 shape[5]; // first rows [0] and [1] is vec2 verts A B C D ,  row [2] fill, row [3] stroke
-
-vec4 AB[13];
-vec4 CD[13];
+uniform int command[13]; // to be renamed command, will include fill() etc not just shapes
+uniform vec4 AB[13];
+uniform vec4 CD[13];
 
 //
 
@@ -188,12 +188,10 @@ vec4 blend(vec4 background , vec4 foreground, int mode){
 }
 
 void main() {
-    vec4 frag=background;
-
     // the arrays shall be set by processing but setting manually while coding
 
     //array of commands
-    command[ 0] = 9; //background
+  /*  command[ 0] = 9; //background
     command[ 1] = 8; //strokeWeight
     command[ 2] = 7; //stroke
     command[ 3] = 1; //line
@@ -232,13 +230,13 @@ void main() {
     AB[10]=vec4(0.730,0.623,0.544,1.000);
     //quad
     AB[11]=vec4(30.,490.,310.,480.);
-    CD[11]=vec4(450.,300.,150.,390.);
+    CD[11]=vec4(450.,300.,150.,390.);*/
 
     // main function shall loop through arrays to render fragments from array data, from background to forefront
 
     // ABCD shorthand for 4 first verts from mat4 , fill 3rd row, stroke 4th row
     vec2 A,B,C,D;
-    vec4 fill,stroke;
+    vec4 fill,stroke,frag,background;
     float strokeWeight;
     for (int i=0; i<12; i++){
         if(command[i]==0){ break; } // stops loop , no more commands left in arrray

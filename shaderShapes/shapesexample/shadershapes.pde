@@ -16,14 +16,20 @@ class shaderShapes {
   void beginDraw(){
    // clear arrays and counters
    commandType = new int[13];
+   commandIndex=0;
    AB = new float[4*13];
    CD = new float[4*13];
    }
    void endDraw(){
    //send arrays to, and render them in shader
-   image(view,0,0);
+   glshapes.set("command", commandType);
    glshapes.set("AB", AB, 4);
    glshapes.set("CD", CD, 4);
+   view.beginDraw();
+   //view.shader(glshapes);
+   view.rect(0,0,width,height);
+   view.endDraw();
+   image(view,0,0);
    }
   
   
@@ -36,11 +42,17 @@ class shaderShapes {
       int temp = commandIndex*4+i;
       float val = input[i];
       int com = commandType[commandIndex];
-      if( flipY && com > 0 && com < 6 && i%2 ==0 ){
+      // flip Y coordinates if needed
+      if( flipY && com > 0 && com < 6 && i%2 ==1 ){
+        
+        /* added to not "flip" height of ellipse" */ 
+        if( com !=3 || com==3 && i==1){
         val=height-val;
+        }
+        
       }
       if (i<4){
-      AB[temp+i]=val;
+      AB[temp]=val;
       }
       else if (i<8){
       CD[temp-4]=val;
@@ -57,7 +69,9 @@ class shaderShapes {
    void strokeWeight(float W){}
    
    void ellipse(float X, float Y, float W, float H){
-     Y = flip(Y);
+   commandType[commandIndex] = 3;
+   ABCD(X,Y,W,H);
+   commandIndex++;
    }
    void triangle(float A, float B, float C, float D, float E, float F){
    commandType[commandIndex] = 4;
@@ -70,7 +84,6 @@ class shaderShapes {
    commandIndex++;
    }
    void line(float A,float B, float C, float D){
-   int temp = commandIndex*16;
    commandType[commandIndex]=1;
    ABCD(A,B,C,D);
    commandIndex++;
@@ -78,7 +91,6 @@ class shaderShapes {
    
   /* bezier should for performance make lines in this class */
   void bezier(float A, float B, float C, float D, float E, float F, float G, float H) {
-    int temp = commandIndex*16;
     commandType[commandIndex]=2;
     ABCD(A,B,C,D,E,F,G,H);
     commandIndex++;
@@ -101,7 +113,6 @@ class shaderShapes {
    commandIndex++;
    }
    void addcolor(color input){
-   int temp = commandIndex*4;
    float [] vec = rgba2vec4(input);
    ABCD (vec[0],vec[1],vec[1],vec[2]);
    }
@@ -109,10 +120,10 @@ class shaderShapes {
    // will probably break on other color format?
    float[] rgba2vec4(color input){
    float[] output = new float[4];
-   output[0] = ((input >> 16) & 0xFF)/255.;
-   output[1] = ((input >>  8) & 0xFF)/255.;
-   output[2] = ( input        & 0xFF)/255.;
-   output[3] = ((input >> 24) & 0xFF)/255.;
+   output[0] = ((input >> 16) & 255)/255.;
+   output[1] = ((input >>  8) & 255)/255.;
+   output[2] = ( input        & 255)/255.;
+   output[3] = ((input >> 24) & 255)/255.;
    return output;
    }
 }
