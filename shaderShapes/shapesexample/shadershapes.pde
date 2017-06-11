@@ -114,7 +114,7 @@ class shaderShapes {
    }
    void addcolor(color input){
    float [] vec = rgba2vec4(input);
-   ABCD (vec[0],vec[1],vec[1],vec[2]);
+   ABCD (vec[0],vec[1],vec[2],vec[3]);
    }
    // shall convert rgba int to 4 normalized floats
    // will probably break on other color format?
