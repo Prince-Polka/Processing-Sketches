@@ -75,8 +75,17 @@ shadershapes gl = new shadershapes();
 void setup(){}
 void draw(){
   gl.beginDraw();
+  gl.background();
+  gl.strokeWeight();
+  gl.stroke();
+  gl.line();
+  gl.stroke();
+  gl.bezier();
   gl.fill();
-  gl.stroke();+
   gl.ellipse();
+  gl.fill();
+  gl.triangle();
+  gl.fill();
+  gl.quad();
   gl.endDraw();
 }
