@@ -9,7 +9,7 @@ uniform vec2 u_mouse;
 /*
 This shader under construction will render shapes sent from processing
 a class in processing, ( not yet implemented ) will handle the communication seamlessly
-syntax shall similar to to PGraphics, but only include simple shapes like line() , not text() 
+syntax shall similar to to PGraphics, but only include simple shapes like line() , not text()
 example
 void draw(){
 .beginDraw();
@@ -25,11 +25,17 @@ void draw(){
 
 // this array shall contain all shape data neeeded to render, and supplied from processing
 
-int type[6];
+int command[13]; // to be renamed command, will include fill() etc not just shapes
+/*
+will not use mat4 shape[], instead twp vec4's , fill and stroke will have their own command/command in the loop
 /* shapes will be stored in arrays, will contain some superfluous data as glsl is not good with lookup
    textures COULD be more efficent but not surely, so ill go with arrays */
-mat4 shape[5]; // first rows [0] and [1] is vec2 verts A B C D ,  row [2] fill, row [3] stroke 
-float strokeWeight[5]; // 
+mat4 shape[5]; // first rows [0] and [1] is vec2 verts A B C D ,  row [2] fill, row [3] stroke
+
+vec4 AB[13];
+vec4 CD[13];
+
+//
 
 // distance things
 float distroot(in vec2 A, in vec2 B) {
@@ -97,19 +103,19 @@ vec2 constrain (vec2 amt, vec2 low, vec2 high){
 bool line (vec2 A, vec2 B, float thickness){
     vec2 C = gl_FragCoord.xy;
     vec2 D = constrain(project(A,B,C),A,B);
-    if ( closerThan ( thickness,C,D) ) { 
-        return true; 
+    if ( closerThan ( thickness,C,D) ) {
+        return true;
     }
     //return false;
 }
 
 // bezier uses bezierpoifilnt and line
 
-vec2 bezierPoint(vec2 A, vec2 B, vec2 C, vec2 D, float T) { 
-    vec2 AB = mix(A,B,T);
-    vec2 BC = mix(B,C,T);
-    vec2 CD = mix(C,D,T);
-    return mix( mix(AB,BC,T) , mix(BC,CD,T) , T );
+vec2 bezierPoint(vec2 A, vec2 B, vec2 C, vec2 D, float T) {
+    vec2 ABm = mix(A,B,T);
+    vec2 BCm = mix(B,C,T);
+    vec2 CDm = mix(C,D,T);
+    return mix( mix(ABm,BCm,T) , mix(BCm,CDm,T) , T );
 }
 
 bool bezier(vec2 A, vec2 B, vec2 C, vec2 D){
@@ -129,7 +135,7 @@ for (int i=0; i<10; i++){
 
 /*
 shall have blendmodes for alpha transparency etc
-ID's for processing Blendmodes  ( might not be completely implemented ) 
+ID's for processing Blendmodes  ( might not be completely implemented )
 0 REPLACE
 1 BLEND
 2 ADD
@@ -178,90 +184,105 @@ vec4 blend(vec4 background , vec4 foreground, int mode){
     if (mode == 256){
         //return ;
     }
-    
+
 }
 
 void main() {
     vec4 frag=background;
- 
+
     // the arrays shall be set by processing but setting manually while coding
-    
-    type[0] = 1; //line
-    type[1] = 2; //bezier
-    type[2] = 3; //ellipse
-    type[3] = 4; //triangle
-    type[4] = 5; //quad
-    type[5] = 0; // no shape stop loop
-    
+
+    //array of commands
+    command[ 0] = 9; //background
+    command[ 1] = 8; //strokeWeight
+    command[ 2] = 7; //stroke
+    command[ 3] = 1; //line
+    command[ 4] = 7; //stroke
+    command[ 5] = 2; //bezier
+    command[ 6] = 6; //fill
+    command[ 7] = 3; //ellipse
+    command[ 8] = 6; //fill
+    command[ 9] = 4; //triangle
+    command[10] = 6; //fill
+    command[11] = 5; //quad
+    command[12] = 0; // no shape stop
+    // two vec4 arrays , no more mat4
+    AB[0]= vec4(0.268,0.286,0.370,1.000);
+    //strokeWeight
+    AB[1].x=10.;
+    //stroke
+    AB[2]=vec4(0.805,0.703,0.332,1.000);
     //line
-    shape[0][0] = vec4(40.,380.,200.,340.); // A B verts
-    shape[0][1]=vec4(0.); // C D verts
-    shape[0][2]=vec4(0.); // fill
-    shape[0][3]=vec4(0.805,0.703,0.332,1.000); //stroke
-    
-    //bezier 
-    shape[1][0]=vec4(27.,225.,95.,208.);
-    shape[1][1]=vec4(240.,300.,320.,100.);
-    shape[1][2]=vec4(0.269,0.625,0.273,1.000);
-    shape[1][3]=vec4(0.785,0.373,0.335,1.000);
-    
+    AB[3]=vec4(40.,380.,200.,340.);
+    //stroke
+    AB[4]=vec4(0.805,0.703,0.332,1.000);
+    //bezier
+    AB[5]=vec4(27.,225.,95.,208.);
+    CD[5]=vec4(240.,300.,320.,100.);
+    //fill
+    AB[6]=vec4(0.264,0.625,0.307,1.000);
     //ellipse
-    shape[2][0] = vec4(400.,300.,100.,200);
-    shape[2][1] = vec4(0.);
-    shape[2][2] = vec4(0.264,0.625,0.307,1.000);
-    shape[2][3] = vec4(0.);
-    
+    AB[7]=vec4(400.,300.,100.,200);
+    //fill
+    AB[8]=vec4(0.194,0.165,0.730,1.000);
     //triangle
-    shape[3][0] = vec4(200.,200.,10.,10.); 
-    shape[3][1] = vec4(350.,100.,0.,0.);
-    shape[3][2] = vec4(0.194,0.165,0.730,1.000);
-    shape[3][3] = vec4(0.);
-    
+    AB[9]=vec4(200.,200.,10.,10.);
+    CD[9]=vec4(350.,100.,0.,0.);
+    //fill
+    AB[10]=vec4(0.730,0.623,0.544,1.000);
     //quad
-    shape[4][0] = vec4(30.,490.,310.,480.); 
-    shape[4][1] = vec4(450.,300.,150.,390.);
-    shape[4][2] = vec4(0.730,0.623,0.544,1.000);
-    shape[4][3] = vec4(0.);
+    AB[11]=vec4(30.,490.,310.,480.);
+    CD[11]=vec4(450.,300.,150.,390.);
 
     // main function shall loop through arrays to render fragments from array data, from background to forefront
-    
+
     // ABCD shorthand for 4 first verts from mat4 , fill 3rd row, stroke 4th row
     vec2 A,B,C,D;
     vec4 fill,stroke;
-    for (int i=0; i<5; i++){
-        if(type[i]==0){ break; } // stops loop when no more shapes in array
-    A=vec2 ( shape[i][0][0] , shape[i][0][1]);
-    B=vec2 ( shape[i][0][2] , shape[i][0][3]);
-    C=vec2 ( shape[i][1][0] , shape[i][1][1]);
-    D=vec2 ( shape[i][1][2] , shape[i][1][3]);
-    fill   = shape[i][2];
-    stroke = shape[i][3];
-        if(type[i]==1){
+    float strokeWeight;
+    for (int i=0; i<12; i++){
+        if(command[i]==0){ break; } // stops loop , no more commands left in arrray
+    A=AB[i].xy;
+    B=AB[i].zw;
+    C=CD[i].xy;
+    D=CD[i].zw;
+        if(command[i]==1){
             if ( line(A,B,10.) ){
                 frag = blend (frag, stroke, 0);
             }
         }
-        if(type[i]==2){
+        if(command[i]==2){
             if ( bezier(A,B,C,D) ){
                 frag = blend (frag, stroke, 0);
             }
         }
-        if(type[i]==3){
+        if(command[i]==3){
             if ( ellipse(A,B) ){
                 frag = blend (frag, fill, 0);
             }
         }
-        if(type[i]==4){
+        if(command[i]==4){
             if ( triangle(A,B,C) ){
                 frag = blend (frag, fill, 0);
             }
         }
-        if(type[i]==5){
+        if(command[i]==5){
             if ( quad(A,B,C,D) ){
                 frag = blend (frag, fill, 0);
             }
         }
-        
+        if(command[i]==6){
+            fill = AB[i];
+        }
+        if(command[i]==7){
+            stroke = AB[i];
+        }
+        if(command[i]==8){
+            strokeWeight = AB[i].x;
+        }
+        if(command[i]==9){
+          frag = blend (frag, AB[i], 0);
+        }
     }
 
 gl_FragColor = frag;
