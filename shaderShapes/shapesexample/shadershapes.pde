@@ -5,6 +5,8 @@ class shaderShapes {
   int commandIndex;
   PGraphics view;
   PShader glshapes;
+  int bezierDetail=21;
+  float rot;
   boolean flipY = false; // shader has flipped Y-coordinate compared to proccssing 
 
   shaderShapes() {
@@ -12,13 +14,15 @@ class shaderShapes {
     glshapes = loadShader("shapes.glsl");
     view.shader(glshapes);
   }
-  
+  void bezierDetail(float input){
+    bezierDetail=max(30,min(3,((int(input)+2)/3)*3));
+  }
   void beginDraw(){
    // clear arrays and counters
-   commandType = new int[13];
+   commandType = new int[130];
    commandIndex=0;
-   AB = new float[4*13];
-   CD = new float[4*13];
+   AB = new float[4*130];
+   CD = new float[4*130];
    }
    void endDraw(){
    //send arrays to, and render them in shader
@@ -66,17 +70,33 @@ class shaderShapes {
    // does nothing
    }
    
-   void strokeWeight(float W){}
+   void strokeWeight(float W){
+     commandType[commandIndex] = 8;
+     ABCD(W);
+     commandIndex++;
+   }
    
-   void ellipse(float X, float Y, float W, float H){
+   void ellipseold(float X, float Y, float W, float H){
    commandType[commandIndex] = 3;
    ABCD(X,Y,W,H);
    commandIndex++;
    }
+   
+   void ellipse(float X, float Y, float W, float H){
+   commandType[commandIndex] = 3;
+   W=(W*W)/4.;
+   H=(H*H)/4.;
+   float E = cos(rot);
+   float F = sin(rot);
+   ABCD(X,Y,W,H,E,F);
+   commandIndex++;
+   }
+   
    void triangle(float A, float B, float C, float D, float E, float F){
    commandType[commandIndex] = 4;
    ABCD(A,B,C,D,E,F);
    commandIndex++;
+   triline(A,B,C,D,E,F,A,B);
    }
    void quad(float A,float B, float C, float D, float E,float F, float G, float H){
    commandType[commandIndex] = 5;
@@ -91,9 +111,19 @@ class shaderShapes {
    
   /* bezier should for performance make lines in this class */
   void bezier(float A, float B, float C, float D, float E, float F, float G, float H) {
-    commandType[commandIndex]=2;
-    ABCD(A,B,C,D,E,F,G,H);
-    commandIndex++;
+    /* will call triline */
+    float tempx,tempy,div,temp1;
+    int temp2;
+    float [] results = new float[8];
+    div=1./bezierDetail;
+    for ( int i=0; i<bezierDetail; i++){
+      temp1=div*i;
+      temp2 = (i%4)*2;
+      tempx = bezierPoint(A,C,E,G,temp1);
+      tempy = bezierPoint(B,D,F,H,temp1);
+      results[temp2]=tempx; results[temp2+1]=tempy;
+      if(i%4==3){ triline(results); }
+    }
   }
    
    void fill(color input){
@@ -112,13 +142,21 @@ class shaderShapes {
    addcolor(input);
    commandIndex++;
    }
-   void addcolor(color input){
+   private void triline(float[] FA){
+     triline(FA[0],FA[1],FA[2],FA[3],FA[4],FA[5],FA[6],FA[7]);
+   }
+   private void triline(float A, float B, float C, float D, float E, float F, float G, float H){
+    commandType[commandIndex]=2;
+    ABCD(A,B,C,D,E,F,G,H);
+    commandIndex++;
+   }
+   private void addcolor(color input){
    float [] vec = rgba2vec4(input);
    ABCD (vec[0],vec[1],vec[2],vec[3]);
    }
    // shall convert rgba int to 4 normalized floats
    // will probably break on other color format?
-   float[] rgba2vec4(color input){
+   private float[] rgba2vec4(color input){
    float[] output = new float[4];
    output[0] = ((input >> 16) & 255)/255.;
    output[1] = ((input >>  8) & 255)/255.;

@@ -30,10 +30,10 @@ void draw(){
 will not use mat4 shape[], instead twp vec4's , fill and stroke will have their own command/command in the loop
 /* shapes will be stored in arrays, will contain some superfluous data as glsl is not good with lookup
    textures COULD be more efficent but not surely, so ill go with arrays */
-mat4 shape[5]; // first rows [0] and [1] is vec2 verts A B C D ,  row [2] fill, row [3] stroke
-uniform int command[13]; // to be renamed command, will include fill() etc not just shapes
-uniform vec4 AB[13];
-uniform vec4 CD[13];
+ // first rows [0] and [1] is vec2 verts A B C D ,  row [2] fill, row [3] stroke
+uniform int command[130]; // to be renamed command, will include fill() etc not just shapes
+uniform vec4 AB[130];
+uniform vec4 CD[130];
 
 //
 
@@ -62,7 +62,15 @@ bool closerThan(float len, vec2 A, vec2 B){
 }
 
 // shapes
-
+bool ellipseR(vec2 pos, vec2 size, vec2 rot){
+    vec2 g = gl_FragCoord.xy-pos;
+    vec2 temp;
+    temp.x=dot(g*rot,vec2(1.,-1.));
+    temp.y=dot(g*rot.yx,vec2(1.));
+    temp*=temp;
+    temp/=size;
+    if(dot(temp,vec2(1.))<1.){return true;}
+    }
 bool ellipse(vec2 pos, vec2 size) {
     vec2 e = ( gl_FragCoord.xy - pos) / size;
     e*=e;
@@ -108,8 +116,12 @@ bool line (vec2 A, vec2 B, float thickness){
     }
     //return false;
 }
+// triline draws 3 connected lines, , will be used by triangle for outline, and other shapes
+bool triline(vec2 A, vec2 B, vec2 C, vec2 D, float thickness){
+  return line(A,B,thickness) || line(B,C,thickness) || line(C,D,thickness);
+}
 
-// bezier uses bezierpoifilnt and line
+// bezier uses bezierpoifilnt and line should be in processing class, adding "triline"
 
 vec2 bezierPoint(vec2 A, vec2 B, vec2 C, vec2 D, float T) {
     vec2 ABm = mix(A,B,T);
@@ -245,17 +257,18 @@ void main() {
     C=CD[i].xy;
     D=CD[i].zw;
         if(command[i]==1){
-            if ( line(A,B,10.) ){
+            if ( line(A,B,strokeWeight) ){
                 frag = blend (frag, stroke, 0);
             }
         }
+        // bezier replaced with triline
         if(command[i]==2){
-            if ( bezier(A,B,C,D) ){
+            if ( triline(A,B,C,D,strokeWeight) ){
                 frag = blend (frag, stroke, 0);
             }
         }
         if(command[i]==3){
-            if ( ellipse(A,B) ){
+            if ( ellipseR(A,B,C) ){
                 frag = blend (frag, fill, 0);
             }
         }

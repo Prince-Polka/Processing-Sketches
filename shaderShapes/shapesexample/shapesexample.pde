@@ -4,17 +4,19 @@ void setup(){
   gl = new shaderShapes();
 }
 void draw(){
+  gl.rot+=0.01;
+  gl.rot%=TWO_PI;
   gl.beginDraw();
   gl.background(#222222);
   gl.strokeWeight(10.0);
   gl.stroke(#abcdef);
   gl.line(10,10,40,40);
   gl.stroke(#ff2ba3);
-  gl.bezier(10,10,40,140,400,100,300,400);
+  //gl.bezier(210,210,240,440,400,100,300,400);
   gl.fill(#48bfa3);
-  gl.ellipse(300,300,30,30);
+  gl.ellipse(300,300,130,30);
   gl.fill(#11ff11);
-  gl.triangle(10,10,40,140,200,100);
+  gl.triangle(110,110,140,240,300,200);
   gl.fill(#fedcba);
   gl.quad(10,10,100,10,100,100,10,100);
   gl.endDraw();
