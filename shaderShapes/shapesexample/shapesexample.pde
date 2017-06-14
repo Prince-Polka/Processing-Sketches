@@ -1,12 +1,23 @@
 shaderShapes gl;
+float rot;
 void setup(){
   size(500,500,P2D);
   gl = new shaderShapes();
 }
 void draw(){
-  gl.rot+=0.01;
-  gl.rot%=TWO_PI;
+  /*
+  gl.pushMatrix();
+  gl.translate();
+  gl.rotate();
+  gl.scale();
+  gl.popMatrix();
+  */
+  rot+=0.01;
+  rot%=TWO_PI;
   gl.beginDraw();
+  
+  //gl.translate(mouseX,mouseY);
+  gl.rotate(rot);
   gl.background(#222222);
   gl.strokeWeight(10.0);
   gl.stroke(#abcdef);
