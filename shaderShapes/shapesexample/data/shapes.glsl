@@ -9,18 +9,21 @@ uniform vec2 u_mouse;
 /*
 This shader under construction will render shapes sent from processing
 a class in processing, ( not yet implemented ) will handle the communication seamlessly
-syntax shall similar to to PGraphics, but only include simple shapes like line() , not text()
-example
-void draw(){
-.beginDraw();
-.background();
-.fill();
-.stroke();
-.line();
-.ellipse();
-.quad();
-.endDraw();
-}
+syntax shall similar to to PGraphics, but only include a subset of the methods  
+line, rect, quad, ellipse, triangle, ellipse, bezier,
+stroke and fill  
+rotate, translate , scale, push and pop matrix will be supported  
+
+depending on my motivation more things MIGHT be put in  
+
+skew/shear undecided , not commonly used and a bit tricky 
+would probably work for straight-line shapes...
+but fuck up curved shapes like ellipse/bezier unless some efficent math trick on FragCoord can solve it 
+
+text() , text might seen like the very basics but font rendering can be tricky,  
+one thing that irks me about processing's text is that it's not subpixel rendered...  
+so I kind of wan't to make subpixel font-rendering but it's daunting
+
 */
 
 // this array shall contain all shape data neeeded to render, and supplied from processing
