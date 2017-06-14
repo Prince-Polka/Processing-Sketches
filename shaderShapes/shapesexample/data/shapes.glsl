@@ -31,9 +31,9 @@ will not use mat4 shape[], instead twp vec4's , fill and stroke will have their 
 /* shapes will be stored in arrays, will contain some superfluous data as glsl is not good with lookup
    textures COULD be more efficent but not surely, so ill go with arrays */
  // first rows [0] and [1] is vec2 verts A B C D ,  row [2] fill, row [3] stroke
-uniform int command[130]; // to be renamed command, will include fill() etc not just shapes
-uniform vec4 AB[130];
-uniform vec4 CD[130];
+uniform int command[924]; // to be renamed command, will include fill() etc not just shapes
+uniform vec4 AB[924];
+uniform vec4 CD[924];
 
 //
 
@@ -65,18 +65,35 @@ bool closerThan(float len, vec2 A, vec2 B){
 bool ellipseR(vec2 pos, vec2 size, vec2 rot){
     vec2 g = gl_FragCoord.xy-pos;
     vec2 temp;
+    float re;
     temp.x=dot(g*rot,vec2(1.,-1.));
     temp.y=dot(g*rot.yx,vec2(1.));
     temp*=temp;
     temp/=size;
-    if(dot(temp,vec2(1.))<1.){return true;}
+    re=dot(temp,vec2(1.));
+    if(re>=0.5 && re<=1.){return true;}
     }
+
+    bool ellipseRold(vec2 pos, vec2 size, vec2 rot){
+        vec2 g = gl_FragCoord.xy-pos;
+        vec2 temp;
+        temp.x=dot(g*rot,vec2(1.,-1.));
+        temp.y=dot(g*rot.yx,vec2(1.));
+        temp*=temp;
+        temp/=size;
+        if(dot(temp,vec2(1.))<1.){return true;}
+        }
 bool ellipse(vec2 pos, vec2 size) {
     vec2 e = ( gl_FragCoord.xy - pos) / size;
     e*=e;
     if( e.x+e.y < 1. ) { return true; }
     return false;
 }
+bool cirlce(vec2 pos, float size) {
+    return closerThan(size,pos,gl_FragCoord.xy);
+}
+
+
 
 // quad uses triangle which uses side
 
@@ -103,9 +120,17 @@ vec2 project(vec2 A, vec2 B, vec2 C){
     return A+L*K;
 }
 
+
+
 vec2 constrain (vec2 amt, vec2 low, vec2 high){
     //return clamp(amt,min(low,high),max(low,high));
     return min(max(amt,min(low,high)),max(low,high));
+}
+
+bool rect(vec2 A, vec2 B){
+    vec2 p = gl_FragCoord.xy;
+    vec2 con = (constrain(p,A,B));
+    return p==con;
 }
 
 bool line (vec2 A, vec2 B, float thickness){
@@ -293,6 +318,11 @@ void main() {
         }
         if(command[i]==9){
           frag = blend (frag, AB[i], 0);
+        }
+        if(command[i]==10){
+            if ( rect(A,B) ){
+                frag = blend (frag, fill, 0);
+            }
         }
     }
 

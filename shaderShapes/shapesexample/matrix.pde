@@ -15,6 +15,15 @@ class matrixStack{
     stack.add(current);
     index++;
   }
+  float getangle(){
+    return atan2(current.m10,current.m00);
+  }
+  float gettransX(){
+    return cos(current.m02);
+  }
+  float gettransY(){
+    return current.m12;
+  }
   void pop(){
     if( index > 0 ){
     current=stack.get(index);

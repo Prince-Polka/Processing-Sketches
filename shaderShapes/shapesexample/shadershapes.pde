@@ -6,8 +6,10 @@ class shaderShapes {
   PGraphics view;
   PShader glshapes;
   int bezierDetail=21;
+  int rectmode;
   matrixStack stack;
-
+  boolean noFill;
+  boolean noStroke;
   boolean flipY = true; // shader has flipped Y-coordinate compared to proccssing 
 
   shaderShapes() {
@@ -22,11 +24,14 @@ class shaderShapes {
   }
   void beginDraw() {
     // clear arrays and counters
-    commandType = new int[130];
+    commandType = new int[924];
     commandIndex=0;
+    noStroke = false;
+    noFill = false;
+    rectmode = CORNER;
     resetMatrix();
-    AB = new float[4*130];
-    CD = new float[4*130];
+    AB = new float[4*924];
+    CD = new float[4*924];
   }
   void endDraw() {
     //send arrays to, and render them in shader
@@ -75,7 +80,12 @@ class shaderShapes {
   void scale(float sx, float sy) {
     stack.scale(sx,sy);
   }
-  
+  void noStroke(){
+    noStroke = true;
+  }
+  void noFill(){
+    noStroke = true;
+  }
 
   /* puts values into the value array sent to shader */
   private void ABCD(float... input) {
@@ -108,14 +118,12 @@ class shaderShapes {
   }
   
   
-  void rectMode(int i) {
-    // does nothing
-  }
-  void rect() {
-    // does nothing
+  void rectMode(int mode) {
+    rectmode = mode;
   }
 
   void strokeWeight(float W) {
+    // noStroke = false; ?
     commandType[commandIndex] = 8;
     ABCD(W);
     commandIndex++;
@@ -131,26 +139,91 @@ class shaderShapes {
     commandType[commandIndex] = 3;
     W=(W*W)/4.;
     H=(H*H)/4.;
-    float E = cos(rot);
-    float F = sin(rot);
-    //A = stack.current.multX(A,B);
-    //B = stack.current.multY(A,B);
+    // retrive rotation from current matrix
+    float E = stack.current.m00;
+    float F = stack.current.m10;
+    A = stack.current.multX(A,B);
+    B = stack.current.multY(A,B);
+    if(flipY) { B=height-B; }
     //ABCDt(A, B);
     ABCD(A,B,W, H, E, F);
     commandIndex++;
   }
 
   void triangle(float A, float B, float C, float D, float E, float F) {
+    if(!noFill){
     commandType[commandIndex] = 4;
     ABCDt(A, B, C, D, E, F);
     commandIndex++;
+    }
+    if(!noStroke){
     triline(A, B, C, D, E, F, A, B);
+    }
   }
   void quad(float A, float B, float C, float D, float E, float F, float G, float H) {
+    if(!noFill){
     commandType[commandIndex] = 5;
     ABCDt(A, B, C, D, E, F, G, H);
     commandIndex++;
+    }
+    if(!noStroke){
+    triline(A, B, C, D, E, F, G, H);
+    line(G, H, A, B);
+    }
   }
+  
+  private void rect90(float A, float B, float E, float F){
+    if(!noFill){
+    commandType[commandIndex] = 10;
+    ABCDt(A,B,E,F);
+    commandIndex++;
+    }
+    if(!noStroke){
+    triline(A,B,E,B,E,F,A,F);
+    line(A,F,A,B);
+    }
+    
+  }
+  
+  /* rectMode supported */
+  /* rounded corners not supported */
+  void rect(float a, float b, float c, float d) {
+    float A,B,C,D,E,F,G,H,x,y;
+    if(rectmode == CORNERS){
+      A = G = a;
+      B = D = b;
+      C = E = c;
+      F = H = d;
+    }
+    else{
+      if(rectmode == CORNER){
+        x=a;
+        y=b;
+      }
+      else{
+        if(rectmode == RADIUS){
+          c*=2; 
+          d*=2;
+        }
+          x=a-c/2; 
+          y=b-d/2;
+      }
+    A = C = E = G = x;
+    B = D = F = H = y;
+    C +=c;
+    E +=c;
+    F +=d;
+    H +=d;
+    }
+    // if close enough to 90 degree angle
+    if( abs (stack.getangle()%HALF_PI)<0.01){
+      rect90(A,B,E,F);
+    }
+    else {
+    quad(A,B,C,D,E,F,G,H);
+    }
+  }
+  
   void line(float A, float B, float C, float D) {
     commandType[commandIndex]=1;
     ABCDt(A, B, C, D);
@@ -177,12 +250,14 @@ class shaderShapes {
   }
 
   void fill(color input) {
+    noFill=false;
     commandType[commandIndex] = 6;
     addcolor(input);
     commandIndex++;
   }
   void stroke(color input) {
     // should work like fill
+    noStroke = false;
     commandType[commandIndex] = 7;
     addcolor(input);
     commandIndex++;
