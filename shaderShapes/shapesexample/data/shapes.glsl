@@ -89,8 +89,15 @@ bool ellipse(vec2 pos, vec2 size) {
     if( e.x+e.y < 1. ) { return true; }
     return false;
 }
-bool cirlce(vec2 pos, float size) {
+bool circle(vec2 pos, float size) {
     return closerThan(size,pos,gl_FragCoord.xy);
+}
+// just a ring , cirlce outline
+bool halo(vec2 pos, float A, float B) {
+  vec2 del = pos-gl_FragCoord.xy;
+  del*=del;
+  float both = del.x+del.y;
+  return both > A && both < B;
 }
 
 
@@ -127,6 +134,7 @@ vec2 constrain (vec2 amt, vec2 low, vec2 high){
     return min(max(amt,min(low,high)),max(low,high));
 }
 
+// rect only called for 90 degree, PI/2 rotation, otherwise the slower quad is called
 bool rect(vec2 A, vec2 B){
     vec2 p = gl_FragCoord.xy;
     vec2 con = (constrain(p,A,B));
@@ -322,6 +330,16 @@ void main() {
         if(command[i]==10){
             if ( rect(A,B) ){
                 frag = blend (frag, fill, 0);
+            }
+        }
+        if(command[i]==11){
+            if ( circle(A,B.x) ){
+                frag = blend (frag, fill, 0);
+            }
+        }
+        if(command[i]==12){
+            if ( halo(A,B.x,B.y) ){
+                frag = blend (frag, stroke, 0);
             }
         }
     }

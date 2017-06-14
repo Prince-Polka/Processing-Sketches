@@ -8,6 +8,9 @@ class shaderShapes {
   int bezierDetail=21;
   int rectmode;
   matrixStack stack;
+  
+  float strokeWeight;
+  
   boolean noFill;
   boolean noStroke;
   boolean flipY = true; // shader has flipped Y-coordinate compared to proccssing 
@@ -26,6 +29,7 @@ class shaderShapes {
     // clear arrays and counters
     commandType = new int[924];
     commandIndex=0;
+    strokeWeight=1;
     noStroke = false;
     noFill = false;
     rectmode = CORNER;
@@ -78,6 +82,7 @@ class shaderShapes {
     stack.scale(s, s);
   }
   void scale(float sx, float sy) {
+    strokeWeight*=sx;
     stack.scale(sx,sy);
   }
   void noStroke(){
@@ -124,6 +129,7 @@ class shaderShapes {
 
   void strokeWeight(float W) {
     // noStroke = false; ?
+    strokeWeight=W;
     commandType[commandIndex] = 8;
     ABCD(W);
     commandIndex++;
@@ -134,8 +140,36 @@ class shaderShapes {
     ABCD(X, Y, W, H);
     commandIndex++;
   }
+  void circle(float A,float B,float C){
+    if(!noFill){
+    commandType[commandIndex] = 11;
+    ABCDt(A,B);
+    AB[commandIndex*4+2]=C;
+    commandIndex++; 
+    }
+    if(!noStroke){
+      commandType[commandIndex] = 12;
+      float start = C-strokeWeight;
+      float end = C+strokeWeight;
+      start*=start;
+      end*=end;
+      ABCDt(A,B);
+      AB[commandIndex*4+2]=start;
+      AB[commandIndex*4+3]=end;
+      commandIndex++; 
+    }
+  }
+  
+  void halo(float A, float B, float W, float H){
+    
+    
+  }
 
   void ellipse(float A, float B, float W, float H) {
+    if(W==H){
+      circle(A, B, W);
+    }
+    else{
     commandType[commandIndex] = 3;
     W=(W*W)/4.;
     H=(H*H)/4.;
@@ -148,6 +182,7 @@ class shaderShapes {
     //ABCDt(A, B);
     ABCD(A,B,W, H, E, F);
     commandIndex++;
+    }
   }
 
   void triangle(float A, float B, float C, float D, float E, float F) {
@@ -182,7 +217,6 @@ class shaderShapes {
     triline(A,B,E,B,E,F,A,F);
     line(A,F,A,B);
     }
-    
   }
   
   /* rectMode supported */

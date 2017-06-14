@@ -29,11 +29,13 @@ void draw(){
   gl.stroke(#ff2ba3);
   //gl.bezier(210,210,240,440,400,100,300,400);
   gl.fill(#48bfa3);
+  gl.ellipse(200,200,130,130);
   gl.rectMode(RADIUS);
   gl.rect(mouseX,mouseY,50,100);
   gl.fill(#11ff11);
   //gl.triangle(110,110,140,240,320,210);
   gl.ellipse(300,300,330,130);
+  
   
   
   gl.fill(#fedcba);
