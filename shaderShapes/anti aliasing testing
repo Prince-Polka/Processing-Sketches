@@ -1,0 +1,67 @@
+http://thebookofshaders.com/edit.php?log=170618225512  
+
+// Author:
+// Title:
+
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+uniform float u_time;
+
+vec2 project(vec2 A, vec2 B, vec2 C){
+    vec2 L = B-A;
+    float K = dot(C-A,L);
+    K/= dot(L,L);
+    return A+L*K;
+}
+
+bool closerThan(float len, vec2 A, vec2 B){
+  vec2 del = A-B;
+  del*=del;
+  len*=len;
+  return del.x+del.y < len;
+}
+
+float dsmooth(float len, vec2 A, vec2 B){
+  vec2 del = A-B;
+  del*=del;
+    float marg=len+1.;
+    //marg*=marg;
+    //len*=len; // supply pre-squared from cpu?  
+    float di = del.x+del.y ;
+    if(di < len*marg)
+    {return 0.;}
+    if(di > marg*marg)
+    {return 1.;}
+    return sqrt(di) - len ;
+    
+}
+
+vec2 constrain (vec2 amt, vec2 low, vec2 high){
+    return min(max(amt,min(low,high)),max(low,high));
+}
+
+
+float line (vec2 A, vec2 B, vec2 C, float thickness){
+    
+    vec2 D = constrain(project(A,B,C),A,B);
+    
+    return dsmooth (thickness,C,D);
+}
+
+float r,g,b;
+void main() {
+    r=g=b=1.0;
+    vec2 green = gl_FragCoord.xy;
+    vec2 red = vec2(green.x-0.3333,green.y);
+    vec2 blue = vec2(green.x+0.3333,green.y);
+    
+   r = line(vec2(100.,100.),u_mouse,red,10.);
+    g = line(vec2(100.,100.),u_mouse,green,10.);
+    b = line(vec2(100.,100.),u_mouse,blue,10.);
+
+    gl_FragColor = vec4(r,g,b,1.0);
+}
