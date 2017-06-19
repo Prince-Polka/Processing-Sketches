@@ -1,0 +1,83 @@
+http://thebookofshaders.com/edit.php?log=170619175030  
+
+testing line-intersection between fragcoord + distant point, against all sides of poly, if even number of intersections point is inside  
+
+using this function https://stackoverflow.com/questions/9043805/test-if-two-lines-intersect-javascript-function    
+
+
+
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+uniform float u_time;
+vec2 poly[8];
+bool isnan(float i){
+    if( i > 1.0 || i <= 1.0){return false;}
+    return true;
+}
+bool sect(vec2 A, vec2 B, vec2 C, vec2 D){
+    float x = ((A.x*B.y-A.y*B.x) * (C.x-D.x) - (A.x-B.x) * (C.x*D.y-C.y*D.x))/((A.x-B.x)*(C.y-D.y)-(A.y-B.y)*(C.x-D.x));
+    float y = ((A.x*B.y-A.y*B.x) * (C.y-D.y) - (A.y-B.y) * (C.x*D.y-C.y*D.x))/((A.x-B.x)*(C.y-D.y)-(A.y-B.y)*(C.x-D.x));
+    if (isnan(x) || isnan(y) ) {
+        return false;
+    }  else {
+        if (A.x>=B.x) {
+            if ( !(B.x <= x && x <= A.x) ) {return false;}
+        } else {
+            if (!(A.x <= x && x <= B.x)) {return false;}
+        }
+        if (A.y>=B.y) {
+            if (!(B.y <= y && y <= A.y)) {return false;}
+        } else {
+            if (!(A.y <= y && y <= B.y)) {return false;}
+        }
+        if (C.x>=D.x) {
+            if (!(D.x<=x&&x<=C.x)) {return false;}
+        } else {
+            if (!(C.x<=x&&x<=D.x)) {return false;}
+        }
+        if (C.y>=D.y) {
+            if (!(D.y<=y&&y<=C.y)) {return false;}
+        } else {
+            if (!(C.y<=y&&y<=D.y)) {return false;}
+        }
+    }
+    
+    return true;
+}
+
+bool polygon(){
+    vec2 A = gl_FragCoord.xy;
+    vec2 B =  u_mouse.xy;
+    int num = 0;
+    for (int i=0; i<6; i++){
+        if ( sect(A,B,poly[i],poly[i+1]) ){
+            num++;
+        }
+    }
+    if (num==1 || num == 3 || num == 5){return true;}
+}
+
+
+
+
+void main() {
+    float d=0.;
+    poly[0]=vec2(110.,110.);
+    poly[1]=vec2(110.,120.);
+    poly[2]=vec2(120.,160.);
+    poly[3]=vec2(150.,170.);
+    poly[4]=vec2(140.,140.);
+    poly[5]=vec2(120.,130.);
+    poly[6]=vec2(115.,120.);
+    poly[7]=vec2(110.,110.);
+    
+    if (polygon()){
+        d=1.0;
+    }
+
+    gl_FragColor = vec4(vec3(d),1.0);
+}
