@@ -1,6 +1,7 @@
-http://thebookofshaders.com/edit.php?log=170619190950
+http://thebookofshaders.com/edit.php?log=170619193544
 
 testing line-intersection between fragcoord + distant point, against all sides of poly, if even number of intersections point is inside  
+
 
 #ifdef GL_ES
 precision mediump float;
@@ -20,7 +21,28 @@ bool sectline(vec2 A, vec2 B, vec2 C, vec2 D){
     return side(A,B,C) != side(A,B,D) && side(C,D,A) != side(C,D,B);
 }
 
-bool polygon(){
+// now going to try find nearest distance from point to polygon outline
+vec2 project(vec2 A, vec2 B, vec2 C){
+    vec2 L = B-A;
+    float K = dot(C-A,L);
+    K/= dot(L,L);
+    return A+L*K;
+}
+
+float distroot(vec2 A, vec2 B) {
+    A=abs(A-B);
+    A*=A;
+return sqrt(A.x+A.y);
+}
+
+vec2 constrain (vec2 amt, vec2 low, vec2 high){
+    return min(max(amt,min(low,high)),max(low,high));
+}
+
+
+// polygon without smoothing
+
+bool polygonbool(){
     vec2 A = gl_FragCoord.xy;
     vec2 B =  u_mouse;
     int num = 0;
@@ -33,8 +55,32 @@ bool polygon(){
     return false;
 }
 
+float polygonfloat(){
+    vec2 A = gl_FragCoord.xy;
+    vec2 B =  u_mouse;
+    int num = 0;
+    float near=10000.; // starts high will go down in loop
+    float nearcon=10000.; // starts high will go down in loop
+    for (int i=0; i<12; i++){
+        if ( sectline(A,B,poly[i],poly[i+1]) ){
+            num++;
+            vec2 closepoint = constrain(project(poly[i],poly[i+1],A),poly[i],poly[i+1]);
+            nearcon = distroot(A,closepoint);
+            if(nearcon<near){near=nearcon;}
+        }
+    }
+    if (num==1 || num == 3 || num == 5){
+        return 0.;
+    }
+    if(near<=10.0){
+        return near/10.;
+    }
+    return 1.0;
+    
+}
+
 void main() {
-    float d=0.;
+    float d=1.;
     poly[0]=vec2(100.,100.);
     poly[1]=vec2(100.,200.);
     poly[2]=vec2(120.,200.);
@@ -49,9 +95,7 @@ void main() {
     poly[11]=vec2(120.,100.);
     poly[12]=vec2(100.,100.);
     
-    if (polygon()){
-        d=1.0;
-    }
+    d=polygonfloat();
 
     gl_FragColor = vec4(vec3(d),1.0);
 }
