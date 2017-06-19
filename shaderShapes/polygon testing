@@ -1,4 +1,4 @@
-http://thebookofshaders.com/edit.php?log=170619182253
+http://thebookofshaders.com/edit.php?log=170619190950
 
 testing line-intersection between fragcoord + distant point, against all sides of poly, if even number of intersections point is inside  
 
