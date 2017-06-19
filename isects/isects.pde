@@ -1,3 +1,7 @@
+/* xorshift* is a well known fast random number generator 
+ https://en.wikipedia.org/wiki/Xorshift
+ unsure wheter my code works as intended though
+*/
 long x;
 float xorshiftstar(int start, int end, int steps){
   long mod,star;
@@ -8,27 +12,32 @@ float xorshiftstar(int start, int end, int steps){
   star = x * 0x2545F4914F6CDD1DL;
   return min(start,end)+abs( star % mod )/1000.;
 }
-
+/* projects point onto a line, also works in 3D */
 PVector project(PVector A, PVector B, PVector C) {
     PVector L = PVector.sub(B,A);
     float K = PVector.dot( PVector.sub(C,A) , L);
           K/= PVector.dot(L,L);
     return PVector.add(A,PVector.mult(L,K));
  }
- 
+
+/* checks wheter point is on left/right side of line */
 boolean side( PVector A, PVector B, PVector C) {
     return PVector.dot(new PVector(B.y-A.y,A.x-B.x),PVector.sub(C,A))>=0.;
 }
-
+/* checks wheter line AB intersects with line CD 
+ if both lines end-points are on different sides of the other line they are */
 boolean sectline(PVector A, PVector B, PVector C, PVector D){
     return side(A,B,C) != side(A,B,D) && side(C,D,A) != side(C,D,B);
 }
-
+/* checks wheter point D is inside triangle ABC
+ if its on the same left/right-hand side of all 3 triangle lines it is */
 boolean pit(PVector A, PVector B, PVector C, PVector D){
     if ( side(A,B,D) != side(B,C,D) ) {return false;}
     return side(B,C,D)==side(C,A,D);
 }
-
+/* checks wheter point is inside a polygon, a PVector array of vertices
+ if a line from the point to another arbitrary far-away point...
+ intersects with an odd number of polygon-lines it is*/
 boolean pip(PVector point, PVector... poly){
   int len = poly.length;
   int sects=0;
