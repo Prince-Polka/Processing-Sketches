@@ -1,4 +1,4 @@
-http://thebookofshaders.com/edit.php?log=170619200146
+http://thebookofshaders.com/edit.php?log=170619201001
 
 testing line-intersection between fragcoord + distant point, against all sides of poly, if even number of intersections point is inside  
 managed to draw sub-pixel rendered polygon,  
@@ -29,11 +29,6 @@ vec2 project(vec2 A, vec2 B, vec2 C){
     return A+L*K;
 }
 
-float distroot(vec2 A, vec2 B) {
-    A=abs(A-B);
-    A*=A;
-return sqrt(A.x+A.y);
-}
 
 vec2 constrain (vec2 amt, vec2 low, vec2 high){
     return min(max(amt,min(low,high)),max(low,high));
@@ -55,6 +50,14 @@ bool polygonbool(){
     return false;
 }
 
+float di(vec2 A, vec2 B){
+  vec2 del = A-B;
+  del*=del;
+    float di = del.x+del.y ;
+    if(di > 1.0){return 1000.;}
+    return sqrt(di);
+}
+
 float polygonfloat(vec2 A){
     vec2 left,right ; 
     bool leftsect,rightsect;
@@ -71,7 +74,7 @@ float polygonfloat(vec2 A){
         if (  leftsect || rightsect ){
             if(leftsect){num++;}
             vec2 closepoint = constrain(project(poly[i],poly[i+1],A),poly[i],poly[i+1]);
-            nearcon = distroot(A,closepoint);
+            nearcon = di(A,closepoint);
             if(nearcon<near){near=nearcon;}
         }
     }
