@@ -13,7 +13,7 @@ PVector project(PVector A, PVector B, PVector C) {
     PVector L = PVector.sub(B,A);
     float K = PVector.dot( PVector.sub(C,A) , L);
           K/= PVector.dot(L,L);
-    return A.add(PVector.mult(L,K));
+    return PVector.add(A,PVector.mult(L,K));
  }
  
 boolean side( PVector A, PVector B, PVector C) {
