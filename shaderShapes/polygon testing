@@ -1,7 +1,7 @@
-http://thebookofshaders.com/edit.php?log=170619193544
+http://thebookofshaders.com/edit.php?log=170619200146
 
 testing line-intersection between fragcoord + distant point, against all sides of poly, if even number of intersections point is inside  
-
+managed to draw sub-pixel rendered polygon,  
 
 #ifdef GL_ES
 precision mediump float;
@@ -55,15 +55,21 @@ bool polygonbool(){
     return false;
 }
 
-float polygonfloat(){
-    vec2 A = gl_FragCoord.xy;
-    vec2 B =  u_mouse;
+float polygonfloat(vec2 A){
+    vec2 left,right ; 
+    bool leftsect,rightsect;
+    // will need two "lightsources" one on left and right
+    left.y=right.y=A.y;
+    left.x = -1000.;
+    right.x = 1000.;
     int num = 0;
     float near=10000.; // starts high will go down in loop
     float nearcon=10000.; // starts high will go down in loop
     for (int i=0; i<12; i++){
-        if ( sectline(A,B,poly[i],poly[i+1]) ){
-            num++;
+        leftsect=sectline(A,left,poly[i],poly[i+1]);
+        rightsect=sectline(A,right,poly[i],poly[i+1]);
+        if (  leftsect || rightsect ){
+            if(leftsect){num++;}
             vec2 closepoint = constrain(project(poly[i],poly[i+1],A),poly[i],poly[i+1]);
             nearcon = distroot(A,closepoint);
             if(nearcon<near){near=nearcon;}
@@ -72,22 +78,28 @@ float polygonfloat(){
     if (num==1 || num == 3 || num == 5){
         return 0.;
     }
-    if(near<=10.0){
-        return near/10.;
+    if(near<=1.){
+        return near;
     }
     return 1.0;
     
 }
 
+float r,g,b;
 void main() {
-    float d=1.;
+    r=g=b=1.0;
+    vec2 green = gl_FragCoord.xy;
+    vec2 red = vec2(green.x-0.3333,green.y);
+    vec2 blue = vec2(green.x+0.3333,green.y);
+    
+    
     poly[0]=vec2(100.,100.);
-    poly[1]=vec2(100.,200.);
+    poly[1]=vec2(110.,200.);
     poly[2]=vec2(120.,200.);
     poly[3]=vec2(120.,160.);
     poly[4]=vec2(180.,160.);
     poly[5]=vec2(180.,200.);
-    poly[6]=vec2(200.,200.);
+    poly[6]=vec2(210.,200.);
     poly[7]=vec2(200.,100.);
     poly[8]=vec2(180.,100.);
     poly[9]=vec2(180.,140.);
@@ -95,33 +107,9 @@ void main() {
     poly[11]=vec2(120.,100.);
     poly[12]=vec2(100.,100.);
     
-    d=polygonfloat();
+    r=polygonfloat(red);
+    g=polygonfloat(green);
+    b=polygonfloat(blue);
 
-    gl_FragColor = vec4(vec3(d),1.0);
-}
-
-
-
-
-void main() {
-    float d=0.;
-    poly[0]=vec2(100.,100.);
-    poly[1]=vec2(100.,200.);
-    poly[2]=vec2(120.,200.);
-    poly[3]=vec2(120.,160.);
-    poly[4]=vec2(180.,160.);
-    poly[5]=vec2(180.,200.);
-    poly[6]=vec2(200.,200.);
-    poly[7]=vec2(200.,100.);
-    poly[8]=vec2(180.,100.);
-    poly[9]=vec2(180.,140.);
-    poly[10]=vec2(120.,140.);
-    poly[11]=vec2(120.,100.);
-    poly[12]=vec2(100.,100.);
-    
-    if (polygon()){
-        d=1.0;
-    }
-
-    gl_FragColor = vec4(vec3(d),1.0);
+    gl_FragColor = vec4(r,g,b,1.0);
 }
