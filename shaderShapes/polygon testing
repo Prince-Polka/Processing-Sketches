@@ -2,12 +2,6 @@ http://thebookofshaders.com/edit.php?log=170619182253
 
 testing line-intersection between fragcoord + distant point, against all sides of poly, if even number of intersections point is inside  
 
-using this function https://stackoverflow.com/questions/9043805/test-if-two-lines-intersect-javascript-function    
-
-getting artifacts  
-
-
-
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -16,40 +10,14 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 vec2 poly[13];
-bool isnan(float i){
-    if( i > 1.0 || i <= 1.0){return false;}
-    return true;
+
+
+bool side( vec2 A, vec2 B, vec2 C) {
+    return dot(vec2(B.y-A.y,A.x-B.x),C-A)>=0.;
 }
-bool sect(vec2 A, vec2 B, vec2 C, vec2 D){
-    float test = (A.x*B.y-A.y*B.x);
-    float test2 = (C.x*D.y-C.y*D.x);
-    float div = ((A.x-B.x)*(C.y-D.y)-(A.y-B.y)*(C.x-D.x));
-    
-    float x = (test * (C.x-D.x) - (A.x-B.x) * test2)/div;
-    float y = (test * (C.y-D.y) - (A.y-B.y) * test2)/div;
-    
-    if (isnan(x) || isnan(y) ) {
-        return false;
-    }  else {
-        if (A.x>=B.x) {
-        if ( !(B.x <= x && x <= A.x) ) {return false;}
-        }
-        else if ( !(A.x <= x && x <= B.x) ) {return false;}
-        if (A.y>=B.y) {
-        if ( !(B.y <= y && y <= A.y) ) {return false;}
-        }
-        else if ( !(A.y <= y && y <= B.y) ) {return false;}
-        if (C.x>=D.x) {
-        if ( !(D.x<=x&&x<=C.x)) {return false;}
-        }
-        else if ( !(C.x<=x&&x<=D.x)) {return false;}
-        if (C.y>=D.y) {
-        if ( !(D.y<=y&&y<=C.y) ) {return false;}
-        }
-        else if ( !(C.y<=y&&y<=D.y) ) {return false;}
-    }
-    
-    return true;
+
+bool sectline(vec2 A, vec2 B, vec2 C, vec2 D){
+    return side(A,B,C) != side(A,B,D) && side(C,D,A) != side(C,D,B);
 }
 
 bool polygon(){
@@ -57,12 +25,35 @@ bool polygon(){
     vec2 B =  u_mouse;
     int num = 0;
     for (int i=0; i<12; i++){
-        if ( sect(A,B,poly[i],poly[i+1]) ){
+        if ( sectline(A,B,poly[i],poly[i+1]) ){
             num++;
         }
     }
     if (num==1 || num == 3 || num == 5){return true;}
     return false;
+}
+
+void main() {
+    float d=0.;
+    poly[0]=vec2(100.,100.);
+    poly[1]=vec2(100.,200.);
+    poly[2]=vec2(120.,200.);
+    poly[3]=vec2(120.,160.);
+    poly[4]=vec2(180.,160.);
+    poly[5]=vec2(180.,200.);
+    poly[6]=vec2(200.,200.);
+    poly[7]=vec2(200.,100.);
+    poly[8]=vec2(180.,100.);
+    poly[9]=vec2(180.,140.);
+    poly[10]=vec2(120.,140.);
+    poly[11]=vec2(120.,100.);
+    poly[12]=vec2(100.,100.);
+    
+    if (polygon()){
+        d=1.0;
+    }
+
+    gl_FragColor = vec4(vec3(d),1.0);
 }
 
 
