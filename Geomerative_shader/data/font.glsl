@@ -65,6 +65,10 @@ float di(vec2 A, vec2 B){
     return sqrt(di);
 }
 
+bool odd(float num){
+  return int(mod(num,2.0))==1;
+}
+
 float polygonfloat(vec2 A){
     vec2 left,right ;
     bool leftsect,rightsect;
@@ -73,9 +77,14 @@ float polygonfloat(vec2 A){
     left.x = -1000.;
     right.x = 1000.;
     int num = 0;
+    vec2 lastskip = poly[0];
+    int skipindex=0;
     float near=10000.; // starts high will go down in loop
     float nearcon=10000.; // starts high will go down in loop
-    for (int i=0; i<21; i++){
+    for (int i=0; i<924; i++){
+      if(poly[i].x+poly[i].y<=-2.0){break;}
+      if(i>skipindex && poly[i]==lastskip){ i++; skipindex=i+1; lastskip=poly[i+1]; }
+      else{
         leftsect=sectline(A,left,poly[i],poly[i+1]);
         rightsect=sectline(A,right,poly[i],poly[i+1]);
         if (  leftsect || rightsect ){
@@ -84,8 +93,9 @@ float polygonfloat(vec2 A){
             nearcon = di(A,closepoint);
             if(nearcon<near){near=nearcon;}
         }
+      }
     }
-    if (num==1 || num == 3 || num == 5){
+    if (num%2==1){
         return 0.;
     }
     if(near<=1.){
@@ -103,11 +113,11 @@ void main() {
     vec2 blue = vec2(green.x+0.3333,green.y);
 
 
-    if(polygonbool()){r=g=b=0.0;}
+    //if(polygonbool()){r=g=b=0.0;}
 
-    /*r=polygonfloat(red);
+    r=polygonfloat(red);
     g=polygonfloat(green);
-    b=polygonfloat(blue);*/
+    b=polygonfloat(blue);
 
     gl_FragColor = vec4(r,g,b,1.0);
 }
