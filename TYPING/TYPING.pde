@@ -8,6 +8,8 @@ int dilen = 1000;
 long[] nums;
 String[] t9key = { "abcABC", "defDEF", "ghiGHI", "jklJKL", "mnoMNO", "pqrsPQRS", "tuvTUV", "wxyzWXYZ" };
 
+String []lastTypedWord={""};
+
 int box = 100;
 boolean mpa;
 int timestyped;
@@ -16,6 +18,7 @@ String[] numface = { "new","abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wx
 
 void setup() {
   size(300,400,P2D);
+  textSize(20);
   dictionary = loadStrings("dictionary.txt");
   dilen = dictionary.length;
   //diNum = new long[dilen];
@@ -38,12 +41,16 @@ void loadwords(){
 }
 
 void draw(){
+  background(0);
+  
 for (int i=0; i<9; i++){
   fill(230);
   rect(i%3*box,i/3*box,box,box);
   fill(0);
-  text(numface[i],i%3*box+box/2,i/3*box+box/2);
+  text(numface[i],i%3*box+box/3,i/3*box+box/2);
 }
+fill(#00ff00);
+text(lastTypedWord[0],20,350);
 if(mousePressed && !mpa){
   int temp = mouseX/box + mouseY/box*3;
   if(temp==0){
@@ -51,8 +58,9 @@ if(mousePressed && !mpa){
     typedword = 0;
   }
   if(temp>=1 && temp<=8){
-    typedword+=pow(10,timestyped)*temp;
-    println(find(typedword));
+    typedword*=10;
+    typedword+=temp;
+    lastTypedWord = range(typedword);
     timestyped++;
   }
 }

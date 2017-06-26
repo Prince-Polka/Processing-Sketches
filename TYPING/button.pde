@@ -1,3 +1,20 @@
+
+/*int range(long n, long[] list) {
+  int len = list.length;
+  int pivot = len/2;
+  int step = pivot/2;
+  long A = list[min(len, pivot-0)];
+  long B = list[min(len, pivot+1)];
+  while ( A > n || n > B) {
+    //pivot += n<A ? -step : n>B ? step : 0;
+    if (n<A) { pivot-=step; }
+    if (n>B) { pivot+=step; }
+    step = max(1, ceil(step/2.));
+    A = list[min(max(0, pivot-0), len)];
+    B = list[min(max(0, pivot+1), len)];
+  }
+  return pivot;
+}*/
 /*
 
 float X,Y;
