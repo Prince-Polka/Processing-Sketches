@@ -7,8 +7,8 @@ String[] strNums;
 int dilen = 1000;
 long[] nums;
 String[] t9key = { "abcABC", "defDEF", "ghiGHI", "jklJKL", "mnoMNO", "pqrsPQRS", "tuvTUV", "wxyzWXYZ" };
-
-String []lastTypedWord={""};
+String []empty={""};
+String []lastTypedWord=empty;
 
 int box = 100;
 boolean mpa;
@@ -61,6 +61,7 @@ if(mousePressed && !mpa){
   if(temp==0){
     timestyped = 0;
     typedword = 0;
+    lastTypedWord = empty;
   }
   if(temp>=1 && temp<=8){
     typedword*=10;
