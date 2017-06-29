@@ -14,6 +14,7 @@ int box = 100;
 boolean mpa;
 int timestyped;
 long typedword;
+String all;
 String[] numface = { "new","abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz" };
 
 void setup() {
@@ -50,7 +51,11 @@ for (int i=0; i<9; i++){
   text(numface[i],i%3*box+box/3,i/3*box+box/2);
 }
 fill(#00ff00);
-text(lastTypedWord[0],20,350);
+all="";
+for(int i=0; i<lastTypedWord.length;i++){
+  all+=" "+lastTypedWord[i];
+}
+text(all,20,350);
 if(mousePressed && !mpa){
   int temp = mouseX/box + mouseY/box*3;
   if(temp==0){
