@@ -5,15 +5,16 @@ String[] range(long n){
      l=r=index = binarysearch(n,nums);
  long L,C,R;
       L=C=R = nums[index];
- while(L == C || C == R){
+ while(L == C && C>0 || C == R){
  if( L == C ){ l = min(max(0, l-1), len); }
  if( R == C ){ r = min(max(0, r+1), len); }
  L = nums[l];
  R = nums[r];
  }
- if(l<index){l++;}
- if(r<=index){r++;}
+ if(l<index){l=index;}
+ if(r<=index){r=index+1;}
  int delta = r-l;
+ 
  output = new String[delta];
  for (int i=0; i<delta; i++){
    output[i]=strings[i+l];

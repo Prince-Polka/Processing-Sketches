@@ -12,7 +12,6 @@ String []lastTypedWord=empty;
 
 int box = 100;
 boolean mpa;
-int timestyped;
 long typedword;
 String all;
 String[] numface = { "new","abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz" };
@@ -59,7 +58,6 @@ text(all,20,350);
 if(mousePressed && !mpa){
   int temp = mouseX/box + mouseY/box*3;
   if(temp==0){
-    timestyped = 0;
     typedword = 0;
     lastTypedWord = empty;
   }
@@ -67,7 +65,6 @@ if(mousePressed && !mpa){
     typedword*=10;
     typedword+=temp;
     lastTypedWord = range(typedword);
-    timestyped++;
   }
 }
 mpa = mousePressed;
