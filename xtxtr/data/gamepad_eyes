@@ -1,0 +1,3 @@
+Eyes controller
+XPOS	Pupil X position	3	SLIDER	X-rotation	0	1.0	0.15
+YPOS	Pupil Y Position	3	SLIDER	Y-rotation	0	1.0	0.15

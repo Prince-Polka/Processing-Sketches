@@ -1,0 +1,7 @@
+hittat en "rå" ordlista [x] 
+sorterat om ordlistam efter T9-kod [x]  
+binär sökning i ordlista [x]  
+hittat biblotek för att läsa gamepad [x]
+implementerat gamepad [ ]
+output från program till virtuella tangenter [ ] kanske ej möjligt
+

@@ -1,0 +1,29 @@
+In 2014 I visited a friend of a friend, he used a playstation gamepad with a custom preset for X-padder, as a virtual keyboard+mouse for his pc. 
+
+It was a bit clunky but I thought it was so cool I wanted to try it myself. 
+Did some research and found keyboard periherals that you plug in to your controller.  
+But for programs using the regular joysticks and buttons their interface all seemed clunky.  
+
+I came up with an imo better idea,  
+It was having a T9-like dictionary, snapping your joystick in 8 directions for each letter up until the last letter where you hold it at the edge and twist it like a rotary phone to select the word you wanted from the dictionary.  
+Also visioned a spiral pattern, where you fan out when rotating many turns, but for simplicity I went with 3x3 boxes.
+
+Made a prototype circling for every letter without a dictionary.   
+Found the prototype I had backed up and recorded it.  
+https://www.youtube.com/watch?v=Mw-8__UYO9A  
+
+This was made in fusion so the code is not reusable but I think I can remake something like it in processing wit quark's gamepad library.   
+Just started trying to code a dictionary, using the mouse but the plan is to use the gamepad. 
+
+https://www.youtube.com/watch?v=KSHAqj1Olq4  
+
+Here is the code in progress  
+https://github.com/Prince-Polka/Processing-Sketches/tree/master/TYPING  
+
+Doing it in processing will not let you use it as a virtual keyboard as I don't think there's any library for that.  
+And even if you could, if you really wanted to type on a gamepad you could get a keypad-perhiperhal.  
+But still?  
+Is this a worthwhile project?  
+
+
+
