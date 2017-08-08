@@ -143,14 +143,10 @@ bool rect(vec2 A, vec2 B){
     vec2 con = (constrain(p,A,B));
     return p==con;
 }
-
 bool line (vec2 A, vec2 B, float thickness){
     vec2 C = gl_FragCoord.xy;
     vec2 D = constrain(project(A,B,C),A,B);
-    if ( closerThan ( thickness,C,D) ) {
-        return true;
-    }
-    //return false;
+    return closerThan (thickness,C,D) ;
 }
 // triline draws 3 connected lines, , will be used by triangle for outline, and other shapes
 bool triline(vec2 A, vec2 B, vec2 C, vec2 D, float thickness){
