@@ -123,6 +123,17 @@ bool quad(vec2 A, vec2 B, vec2 C, vec2 D){
 }
 
 //line uses project and constrain
+
+/*
+self contained version
+float line (vec2 A, vec2 B, float thickness){
+    vec2 C = gl_FragCoord.xy;
+    vec2 L = A-B;
+    C -= clamp(A + L * dot(C-A,L) / dot(L,L), A, B);
+    return float( dot(C,C) < thickness*thickness);
+}
+*/
+
 vec2 project(vec2 A, vec2 B, vec2 C){
     vec2 L = B-A;
     float K = dot(C-A,L);
@@ -148,6 +159,7 @@ bool line (vec2 A, vec2 B, float thickness){
     vec2 D = constrain(project(A,B,C),A,B);
     return closerThan (thickness,C,D) ;
 }
+
 // triline draws 3 connected lines, , will be used by triangle for outline, and other shapes
 bool triline(vec2 A, vec2 B, vec2 C, vec2 D, float thickness){
   return line(A,B,thickness) || line(B,C,thickness) || line(C,D,thickness);
