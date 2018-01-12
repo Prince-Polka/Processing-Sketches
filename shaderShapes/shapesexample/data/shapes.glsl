@@ -110,6 +110,14 @@ bool halo(vec2 pos, float A, float B) {
 bool side( vec2 A, vec2 B) {
     return dot(vec2(B.y-A.y,A.x-B.x),gl_FragCoord.xy-A)>=0.;
 }
+/* possibly better ? */
+float triangle(vec2 A, vec2 B, vec2 C) {
+    float AB = side(A,B);
+    return clamp(AB*side(B,C),0.,1.) * 
+           clamp(AB*side(C,A),0.,1.);
+}
+
+/*
 bool triangle(vec2 A, vec2 B, vec2 C) {
  bool a = side(A,B);
  bool b = side(B,C);
@@ -117,6 +125,7 @@ bool triangle(vec2 A, vec2 B, vec2 C) {
  bool c = side(C,A);
  return b==c;
 }
+*/
 
 bool quad(vec2 A, vec2 B, vec2 C, vec2 D){
    return triangle(A,B,C) || triangle(C,D,A);
